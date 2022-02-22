@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+    db:
+        image: postgres:14.1-alpine
+        container_name: db
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: itv
+            POSTGRES_PASSWORD: itv
+            POSTGRES_DATABASE: itv
+        networks:
+            - itv
+    elasticsearch:
+        container_name: es-container
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.11.0
+        environment:
+            - xpack.security.enabled=false
+            - "discovery.type=single-node"
+        ports:
+            - "9200:9200"
+    keycloak:
+        build:
+            context: ./keycloak
+        container_name: keycloak
+        environment:
+            DB_VENDOR: h2
+            KEYCLOAK_LOGLEVEL: WARN
+            KEYCLOAK_ADMIN: admin
+            KEYCLOAK_ADMIN_PASSWORD: admin
+        ports:
+            - "8089:8080"
+            - "9990:9990"
+        volumes:
+            - ./data:/data
+        networks:
+            - itv
+
+
+volumes:
+    esdata1:
+        driver: local
+networks:
+    itv:
+        driver: bridge
